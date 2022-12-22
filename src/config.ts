@@ -6,6 +6,7 @@ export default {
   // backgroundColor: '#33A5E7',
   width: 448,
   height: 252,
+  zoom: 4,
   physics: {
     default: 'arcade',
     arcade: {
@@ -14,10 +15,8 @@ export default {
     },
   },
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.ScaleModes.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    zoom: 4,
   },
-  pixelArt: true,
-  antialias: false,
+  render: { pixelArt: true, antialias: false },
 }

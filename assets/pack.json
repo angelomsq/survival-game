@@ -1,0 +1,40 @@
+{
+  "preload": {
+    "files": [
+      {
+        "type": "bitmapFont",
+        "key": "PS2PFont",
+        "textureURL": "./assets/fonts/PressStart2P.png",
+        "fontDataURL": "./assets/fonts/PressStart2P.xml"
+      },
+      {
+        "type": "bitmapFont",
+        "key": "CGPixelMini",
+        "textureURL": "./assets/fonts/CG-pixel-mini.png",
+        "fontDataURL": "./assets/fonts/CG-pixel-mini.xml"
+      },
+      {
+        "type": "bitmapFont",
+        "key": "Berkelium",
+        "textureURL": "./assets/fonts/Berkelium1541.png",
+        "fontDataURL": "./assets/fonts/Berkelium1541.xml"
+      },
+      {
+        "type": "tilemapTiledJSON",
+        "key": "map",
+        "url": "./assets/maps/survival.json"
+      },
+      {
+        "type": "image",
+        "key": "tiles",
+        "url": "./assets/tiles/survival_tileset_extruded.png"
+      },
+      {
+        "type": "atlas",
+        "key": "player",
+        "textureURL": "./assets/sprites/player.png",
+        "atlasURL": "./assets/atlas/player.json"
+      }
+    ]
+  }
+}
