@@ -67,24 +67,134 @@ export default class LoadScene extends Phaser.Scene {
      * PLAYER ANIMATIONS (idle/walk/attack)
      */
     let directions = ['left', 'right', 'up', 'down']
-    let characters = [{ name: 'player', opt: ['idle', 'walk', 'atk'] }]
+    let characters = [{ name: 'player', opt: ['idle', 'walk', 'atk', 'roll'] }]
 
     characters.map((char) => {
       char.opt.map((opt) => {
         directions.map((direction) => {
           this.anims.create({
             key: `${char.name}-${opt}-${direction}`,
-            frameRate: 8,
+            frameRate: 6,
             repeat: opt == 'idle' ? -1 : 0,
             frames: this.anims.generateFrameNames(`${char.name}`, {
               prefix: `${char.name}_${opt}_${direction}_`,
               start: 1,
-              end: opt == 'atk' ? 4 : 6,
+              end: opt == 'atk' ? 2 : 4,
               zeroPad: 2,
             }),
           })
         })
       })
+    })
+
+    /**
+     * ENEMIES ANIMATIONS
+     */
+
+    let enemies = [
+      { name: 'skeleton', opt: ['idle', 'walk'] },
+      { name: 'zombie', opt: ['idle', 'walk'] },
+    ]
+
+    enemies.map((enemy) => {
+      enemy.opt.map((opt) => {
+        directions.map((direction) => {
+          this.anims.create({
+            key: `${enemy.name}-${opt}-${direction}`,
+            frameRate: 6,
+            repeat: opt == 'idle' ? -1 : 0,
+            frames: this.anims.generateFrameNames(`${enemy.name}`, {
+              prefix: `${enemy.name}_${opt}_${direction}_`,
+              start: 1,
+              end: opt == 'atk' ? 4 : 4,
+              zeroPad: 2,
+            }),
+          })
+        })
+      })
+    })
+
+    /**
+     * POWER ANIMATIONS
+     */
+
+    this.anims.create({
+      key: 'shoot',
+      frameRate: 6,
+      repeat: -1,
+      yoyo: true,
+      frames: this.anims.generateFrameNames('fireball', {
+        prefix: 'fireball_',
+        start: 1,
+        end: 3,
+        zeroPad: 2,
+      }),
+    })
+
+    this.anims.create({
+      key: 'explode',
+      frameRate: 6,
+      repeat: 0,
+      yoyo: false,
+      frames: this.anims.generateFrameNames('explosion', {
+        prefix: 'explosion_',
+        start: 1,
+        end: 4,
+        zeroPad: 2,
+      }),
+    })
+
+    /**
+     * ITEMS ANIMATION
+     */
+
+    this.anims.create({
+      key: 'heart',
+      repeat: -1,
+      frameRate: 8,
+      frames: this.anims.generateFrameNames('heart', {
+        prefix: 'heart_',
+        start: 1,
+        end: 6,
+        zeroPad: 2,
+      }),
+    })
+
+    this.anims.create({
+      key: 'fire',
+      repeat: -1,
+      yoyo: true,
+      frameRate: 4,
+      frames: this.anims.generateFrameNames('fire', {
+        prefix: 'fire_',
+        start: 1,
+        end: 3,
+        zeroPad: 2,
+      }),
+    })
+
+    this.anims.create({
+      key: 'glow',
+      repeat: -1,
+      frameRate: 8,
+      frames: this.anims.generateFrameNames('coin', {
+        prefix: 'coin_',
+        start: 1,
+        end: 11,
+        zeroPad: 2,
+      }),
+    })
+
+    this.anims.create({
+      key: 'spin',
+      repeat: -1,
+      frameRate: 8,
+      frames: this.anims.generateFrameNames('coin', {
+        prefix: 'coin_',
+        start: 8,
+        end: 11,
+        zeroPad: 2,
+      }),
     })
   }
 }

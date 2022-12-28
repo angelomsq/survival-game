@@ -9,4 +9,5 @@ export interface ICharacter extends ISprite {
   maxBullets: number
   fireRate: number
   direction: string
+  bullets: Phaser.GameObjects.Group
 }

@@ -20,6 +20,31 @@
         "fontDataURL": "./assets/fonts/Berkelium1541.xml"
       },
       {
+        "type": "image",
+        "key": "hudBar",
+        "url": "./assets/images/black_bars.png"
+      },
+      {
+        "type": "image",
+        "key": "heartWhite",
+        "url": "./assets/images/heart_white.png"
+      },
+      {
+        "type": "image",
+        "key": "heartGray",
+        "url": "./assets/images/heart_gray.png"
+      },
+      {
+        "type": "image",
+        "key": "heartRed",
+        "url": "./assets/images/heart_red.png"
+      },
+      {
+        "type": "image",
+        "key": "arrow",
+        "url": "./assets/images/arrow.png"
+      },
+      {
         "type": "tilemapTiledJSON",
         "key": "map",
         "url": "./assets/maps/survival.json"
@@ -34,6 +59,35 @@
         "key": "player",
         "textureURL": "./assets/sprites/player.png",
         "atlasURL": "./assets/atlas/player.json"
+      },
+      {
+        "type": "atlas",
+        "key": "fireball",
+        "textureURL": "./assets/bullets/fireball.png",
+        "atlasURL": "./assets/atlas/fireball.json"
+      },
+      {
+        "type": "atlas",
+        "key": "explosion",
+        "textureURL": "./assets/bullets/explosion.png",
+        "atlasURL": "./assets/atlas/explosion.json"
+      },
+      {
+        "type": "atlas",
+        "key": "skeleton",
+        "textureURL": "./assets/sprites/skeleton.png",
+        "atlasURL": "./assets/atlas/skeleton.json"
+      },
+      {
+        "type": "atlas",
+        "key": "zombie",
+        "textureURL": "./assets/sprites/zombie.png",
+        "atlasURL": "./assets/atlas/zombie.json"
+      },
+      {
+        "type": "image",
+        "key": "shadow",
+        "url": "./assets/images/char_shadow.png"
       }
     ]
   }
