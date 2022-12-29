@@ -13,6 +13,9 @@ export class Player extends Character {
   protected level: number
   protected scoreBar: Phaser.GameObjects.BitmapText
   protected healthHUD: Phaser.GameObjects.Sprite[]
+  protected isRolling: boolean
+  protected rollingTime: number
+  protected lastRoll: number
 
   public getKeys(): Map<string, Phaser.Input.Keyboard.Key> {
     return this.keys
@@ -26,6 +29,9 @@ export class Player extends Character {
     super(attributes)
     this.score = 0
     this.level = 1
+    this.isRolling = false
+    this.rollingTime = 500
+    this.lastRoll = 0
 
     this.scoreBar = this.currentScene.add
       .bitmapText(this.currentScene.cameras.main.width - 44, 8, 'CGPixelMini', '')
@@ -40,7 +46,8 @@ export class Player extends Character {
       ['RIGHT', this.addKey('RIGHT')],
       ['UP', this.addKey('UP')],
       ['DOWN', this.addKey('DOWN')],
-      ['SHOOT', this.addKey('SPACE')],
+      ['SHOOT', this.addKey('A')],
+      ['ROLL', this.addKey('S')],
     ])
   }
 
@@ -48,87 +55,135 @@ export class Player extends Character {
     super.update(time, delta)
     this.getScore()
     this.getHealthHUD()
+
+    if (this.scene.time.now >= this.lastRoll) {
+      this.isRolling = false
+    }
     if (!this.isDying) {
-      if (this.keys.get('LEFT')?.isDown && this.body.velocity.x <= 0) {
-        this.body.setVelocityX(-this.speed)
-        if (this.body.velocity.y === 0) {
-          this.direction = 'left'
+      if (!this.isRolling) {
+        if (this.keys.get('LEFT')?.isDown && this.body.velocity.x <= 0) {
+          this.body.setVelocityX(-this.speed)
+          if (this.body.velocity.y === 0) {
+            this.direction = 'left'
+          }
+        } else if (this.keys.get('RIGHT')?.isDown) {
+          this.body.setVelocityX(this.speed)
+          if (this.body.velocity.y === 0) {
+            this.direction = 'right'
+          }
+        } else {
+          this.body.setVelocityX(0)
         }
-      } else if (this.keys.get('RIGHT')?.isDown) {
-        this.body.setVelocityX(this.speed)
-        if (this.body.velocity.y === 0) {
-          this.direction = 'right'
+
+        if (this.keys.get('UP')?.isDown && this.body.velocity.y <= 0) {
+          this.body.setVelocityY(-this.speed)
+          if (this.body.velocity.x === 0) {
+            this.direction = 'up'
+          }
+        } else if (this.keys.get('DOWN')?.isDown) {
+          this.body.setVelocityY(this.speed)
+          if (this.body.velocity.x === 0) {
+            this.direction = 'down'
+          }
+        } else {
+          this.body.setVelocityY(0)
+        }
+
+        if (this.body.velocity.x !== 0 && this.body.velocity.y !== 0) {
+          this.body.setVelocity(this.body.velocity.x * 0.69, this.body.velocity.y * 0.69)
+        }
+
+        if (this.keys.get('ROLL')?.isDown && this.scene.time.now > this.lastRoll) {
+          if (this.body.velocity.x !== 0 || this.body.velocity.y !== 0) {
+            console.log('roll')
+            this.isRolling = true
+            this.lastRoll = this.scene.time.now + this.rollingTime
+
+            if (this.direction === 'left' && this.keys.get('LEFT')?.isDown) {
+              //roll left
+              this.body.setVelocity(-this.speed * 3, 0)
+            }
+            if (this.direction === 'right' && this.keys.get('RIGHT')?.isDown) {
+              //roll right
+              this.body.setVelocity(this.speed * 3, 0)
+            }
+            if (this.direction === 'up' && this.keys.get('UP')?.isDown) {
+              //roll up
+              this.body.setVelocity(0, -this.speed * 3)
+            }
+            if (this.direction === 'down' && this.keys.get('DOWN')?.isDown) {
+              //roll down
+              this.body.setVelocity(0, this.speed * 3)
+            }
+          }
+        }
+
+        if (this.keys.get('SHOOT')?.isDown && time > this.lastFired) {
+          console.log('shoot', time, this.lastFired)
+          let bullet = this.bullets.getFirstDead(false) as Bullet
+          if (bullet) {
+            bullet.body.reset(this.x, this.y)
+            bullet.setActive(true)
+            bullet.setVisible(true)
+            console.log('fetched bullet', bullet)
+
+            if (this.direction === 'left') {
+              if (this.keys.get('UP')?.isDown) {
+                bullet.direction.set(-0.69, -0.69)
+              } else if (this.keys.get('DOWN')?.isDown) {
+                bullet.direction.set(-0.69, 0.69)
+              } else {
+                bullet.direction.set(-1, 0)
+              }
+            }
+            if (this.direction === 'right') {
+              if (this.keys.get('UP')?.isDown) {
+                bullet.direction.set(0.69, -0.69)
+              } else if (this.keys.get('DOWN')?.isDown) {
+                bullet.direction.set(0.69, 0.69)
+              } else {
+                bullet.direction.set(1, 0)
+              }
+            }
+            if (this.direction == 'up') {
+              if (this.keys.get('LEFT')?.isDown) {
+                bullet.direction.set(-0.69, -0.69)
+              } else if (this.keys.get('RIGHT')?.isDown) {
+                bullet.direction.set(0.69, -0.69)
+              } else {
+                bullet.direction.set(0, -1)
+              }
+            }
+            if (this.direction == 'down') {
+              if (this.keys.get('LEFT')?.isDown) {
+                bullet.direction.set(-0.69, 0.69)
+              } else if (this.keys.get('RIGHT')?.isDown) {
+                bullet.direction.set(0.69, 0.69)
+              } else {
+                bullet.direction.set(0, 1)
+              }
+            }
+            bullet.fire()
+            this.lastFired = time + this.fireRate
+          }
+        }
+      }
+    }
+  }
+
+  protected handleAnimation(): void {
+    if (!this.isDying) {
+      if (!this.isRolling) {
+        if (this.body.velocity.x != 0 || this.body.velocity.y != 0) {
+          this.anims.play(`${this.texture.key}-walk-${this.direction}`, true)
+        } else {
+          this.anims.play(`${this.texture.key}-idle-${this.direction}`, true)
         }
       } else {
-        this.body.setVelocityX(0)
+        this.anims.play(`${this.texture.key}-roll-${this.direction}`, true)
       }
-
-      if (this.keys.get('UP')?.isDown && this.body.velocity.y <= 0) {
-        this.body.setVelocityY(-this.speed)
-        if (this.body.velocity.x === 0) {
-          this.direction = 'up'
-        }
-      } else if (this.keys.get('DOWN')?.isDown) {
-        this.body.setVelocityY(this.speed)
-        if (this.body.velocity.x === 0) {
-          this.direction = 'down'
-        }
-      } else {
-        this.body.setVelocityY(0)
-      }
-
-      if (this.body.velocity.x !== 0 && this.body.velocity.y !== 0) {
-        this.body.setVelocity(this.body.velocity.x * 0.69, this.body.velocity.y * 0.69)
-      }
-
-      if (this.keys.get('SHOOT')?.isDown && time > this.lastFired) {
-        let bullet = this.bullets.getFirstDead(false) as Bullet
-        if (bullet) {
-          bullet.body.reset(this.x, this.y)
-          bullet.setActive(true)
-          bullet.setVisible(true)
-          console.log('fetched bullet', bullet)
-
-          if (this.direction === 'left') {
-            if (this.keys.get('UP')?.isDown) {
-              bullet.direction.set(-0.69, -0.69)
-            } else if (this.keys.get('DOWN')?.isDown) {
-              bullet.direction.set(-0.69, 0.69)
-            } else {
-              bullet.direction.set(-1, 0)
-            }
-          }
-          if (this.direction === 'right') {
-            if (this.keys.get('UP')?.isDown) {
-              bullet.direction.set(0.69, -0.69)
-            } else if (this.keys.get('DOWN')?.isDown) {
-              bullet.direction.set(0.69, 0.69)
-            } else {
-              bullet.direction.set(1, 0)
-            }
-          }
-          if (this.direction == 'up') {
-            if (this.keys.get('LEFT')?.isDown) {
-              bullet.direction.set(-0.69, -0.69)
-            } else if (this.keys.get('RIGHT')?.isDown) {
-              bullet.direction.set(0.69, -0.69)
-            } else {
-              bullet.direction.set(0, -1)
-            }
-          }
-          if (this.direction == 'down') {
-            if (this.keys.get('LEFT')?.isDown) {
-              bullet.direction.set(-0.69, 0.69)
-            } else if (this.keys.get('RIGHT')?.isDown) {
-              bullet.direction.set(0.69, 0.69)
-            } else {
-              bullet.direction.set(0, 1)
-            }
-          }
-          bullet.fire()
-          this.lastFired = time + this.fireRate
-        }
-      }
+    } else {
+      this.kill()
     }
   }
 

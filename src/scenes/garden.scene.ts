@@ -117,7 +117,7 @@ export default class GardenScene extends Phaser.Scene {
     console.log(this.cameras.main.displayHeight)
 
     this.time.addEvent({
-      delay: 1000,
+      delay: 10000,
       callback: () => {
         const randomPoint = this.playArea.getRandomPoint()
         let skeleton = new Enemy({
@@ -185,7 +185,7 @@ export default class GardenScene extends Phaser.Scene {
     let player = playerHurtbox.getData('parent')
     let enemy = enemyHurtbox.getData('parent')
     player.depthSort(enemy)
-    if (!player.isInvincible && !player.isDying) {
+    if (!player.isInvincible && !player.isDying && !player.isRolling) {
       player.hit(enemy.damage)
       player.currentScene.cameras.main.shake(300, 0.005)
     }
