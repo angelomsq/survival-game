@@ -2,6 +2,8 @@ import { Character } from './character'
 import { ICharacter } from '../interfaces/character.interface'
 import { Bullet } from './bullet'
 
+import { sceneEvents } from '../events'
+
 interface IPlayer extends ICharacter {
   score: number
   level: number
@@ -9,10 +11,9 @@ interface IPlayer extends ICharacter {
 
 export class Player extends Character {
   private keys: Map<string, Phaser.Input.Keyboard.Key>
-  protected score: number
+  public score: number
   protected level: number
   protected scoreBar: Phaser.GameObjects.BitmapText
-  protected healthHUD: Phaser.GameObjects.Sprite[]
   protected isRolling: boolean
   protected rollingTime: number
   protected lastRoll: number
@@ -30,15 +31,13 @@ export class Player extends Character {
     this.score = 0
     this.level = 1
     this.isRolling = false
-    this.rollingTime = 500
+    this.rollingTime = 1500
     this.lastRoll = 0
 
     this.scoreBar = this.currentScene.add
       .bitmapText(this.currentScene.cameras.main.width - 44, 8, 'CGPixelMini', '')
       .setScrollFactor(0)
       .setDepth(3)
-
-    this.healthHUD = []
 
     // input
     this.keys = new Map([
@@ -48,19 +47,27 @@ export class Player extends Character {
       ['DOWN', this.addKey('DOWN')],
       ['SHOOT', this.addKey('A')],
       ['ROLL', this.addKey('S')],
+      ['PAUSE', this.addKey('ESC')],
     ])
   }
 
   update(time: number, delta: number): void {
-    super.update(time, delta)
-    this.getScore()
-    this.getHealthHUD()
-
-    if (this.scene.time.now >= this.lastRoll) {
-      this.isRolling = false
-    }
     if (!this.isDying) {
-      if (!this.isRolling) {
+      super.update(time, delta)
+      this.getScore()
+      if (Phaser.Input.Keyboard.JustDown(this.keys.get('PAUSE') as Phaser.Input.Keyboard.Key)) {
+        if (this.currentScene.scene.isPaused()) {
+          this.currentScene.scene.resume()
+        } else {
+          this.currentScene.scene.pause()
+        }
+      }
+
+      if (this.scene.time.now >= this.lastRoll - 1000) {
+        this.isRolling = false
+      }
+
+      if (!this.isRolling && !this.isDamaged) {
         if (this.keys.get('LEFT')?.isDown && this.body.velocity.x <= 0) {
           this.body.setVelocityX(-this.speed)
           if (this.body.velocity.y === 0) {
@@ -93,9 +100,12 @@ export class Player extends Character {
           this.body.setVelocity(this.body.velocity.x * 0.69, this.body.velocity.y * 0.69)
         }
 
-        if (this.keys.get('ROLL')?.isDown && this.scene.time.now > this.lastRoll) {
+        if (
+          Phaser.Input.Keyboard.JustDown(this.keys.get('ROLL') as Phaser.Input.Keyboard.Key) &&
+          this.scene.time.now > this.lastRoll
+        ) {
           if (this.body.velocity.x !== 0 || this.body.velocity.y !== 0) {
-            console.log('roll')
+            // console.log('roll')
             this.isRolling = true
             this.lastRoll = this.scene.time.now + this.rollingTime
 
@@ -118,14 +128,12 @@ export class Player extends Character {
           }
         }
 
-        if (this.keys.get('SHOOT')?.isDown && time > this.lastFired) {
-          console.log('shoot', time, this.lastFired)
+        if (this.keys.get('SHOOT')?.isDown && this.scene.time.now > this.lastFired) {
           let bullet = this.bullets.getFirstDead(false) as Bullet
           if (bullet) {
             bullet.body.reset(this.x, this.y)
             bullet.setActive(true)
             bullet.setVisible(true)
-            console.log('fetched bullet', bullet)
 
             if (this.direction === 'left') {
               if (this.keys.get('UP')?.isDown) {
@@ -168,6 +176,7 @@ export class Player extends Character {
           }
         }
       }
+      sceneEvents.emit('player-bullets', this.bullets.countActive(false))
     }
   }
 
@@ -184,22 +193,6 @@ export class Player extends Character {
       }
     } else {
       this.kill()
-    }
-  }
-
-  protected getHealthHUD(): void {
-    let heartX, color
-    for (let i = 0; i < this.maxHealth; i++) {
-      if (i < this.health) color = 'heartRed'
-      else color = 'heartGray'
-
-      heartX = i * 10 + 8
-
-      if (this.healthHUD[i]) this.healthHUD[i].setTexture(color)
-      else
-        this.healthHUD.push(
-          this.currentScene.add.sprite(heartX, 8, color).setScrollFactor(0).setDepth(3)
-        )
     }
   }
 

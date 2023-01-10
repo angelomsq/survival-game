@@ -45,8 +45,13 @@
         "url": "./assets/images/arrow.png"
       },
       {
+        "type": "image",
+        "key": "redOrb",
+        "url": "./assets/images/red_orb.png"
+      },
+      {
         "type": "tilemapTiledJSON",
-        "key": "map",
+        "key": "survival",
         "url": "./assets/maps/survival.json"
       },
       {
@@ -71,6 +76,24 @@
         "key": "explosion",
         "textureURL": "./assets/bullets/explosion.png",
         "atlasURL": "./assets/atlas/explosion.json"
+      },
+      {
+        "type": "atlas",
+        "key": "coin",
+        "textureURL": "./assets/items/coin.png",
+        "atlasURL": "./assets/atlas/coin.json"
+      },
+      {
+        "type": "atlas",
+        "key": "heart",
+        "textureURL": "./assets/items/heart.png",
+        "atlasURL": "./assets/atlas/heart.json"
+      },
+      {
+        "type": "atlas",
+        "key": "fire",
+        "textureURL": "./assets/items/fire.png",
+        "atlasURL": "./assets/atlas/fire.json"
       },
       {
         "type": "atlas",

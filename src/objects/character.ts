@@ -1,12 +1,14 @@
 import { ICharacter } from '../interfaces/character.interface'
 import { Bullet } from './bullet'
 
+import BaseScene from '../scenes/base.scene'
+
 export class Character extends Phaser.GameObjects.Sprite {
   declare body: Phaser.Physics.Arcade.Body
 
   // variables
-  protected currentScene: Phaser.Scene
-  protected isActivated: boolean
+  protected currentScene: BaseScene
+  protected isDamaged: boolean
   protected isDying: boolean
   protected isInvincible: boolean
   protected isAttacking: boolean
@@ -16,6 +18,7 @@ export class Character extends Phaser.GameObjects.Sprite {
   protected maxBullets: number
   protected direction: string
   protected fireRate: number
+  protected damagedRate: number
   protected lastFired: number
   protected hurtBox: Phaser.GameObjects.Rectangle
   protected shadow: Phaser.GameObjects.Sprite
@@ -27,12 +30,48 @@ export class Character extends Phaser.GameObjects.Sprite {
     return this.hurtBox
   }
 
+  getHealth(): number {
+    return this.health
+  }
+
+  getMaxHealth(): number {
+    return this.maxHealth
+  }
+
+  setMaxHealth(maxHealth: number) {
+    this.maxHealth = maxHealth
+    this.health = maxHealth
+  }
+
+  addHealth(amount: number) {
+    if (this.health + amount > this.maxHealth) this.health = this.maxHealth
+    else this.health += amount
+  }
+
+  getMaxBullets(): number {
+    return this.maxBullets
+  }
+
+  addBullets(amount: number) {
+    if (this.maxBullets + amount <= 5) {
+      this.maxBullets += amount
+
+      this.bullets.createMultiple({
+        frameQuantity: amount,
+        key: 'fireball',
+        active: false,
+        visible: false,
+        classType: Bullet,
+      })
+    }
+  }
+
   constructor(attributes: ICharacter) {
     super(attributes.scene, attributes.x, attributes.y, attributes.texture, attributes.frame)
 
     // variables
-    this.currentScene = attributes.scene
-    this.isActivated = false
+    this.currentScene = attributes.scene as BaseScene
+    this.isDamaged = false
     this.isDying = false
     this.isInvincible = false
     this.isAttacking = false
@@ -45,6 +84,7 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.maxHealth = attributes.maxHealth
     this.maxBullets = attributes.maxBullets
     this.fireRate = attributes.fireRate
+    this.damagedRate = attributes.damagedRate
     this.bullets = attributes.bullets
 
     this.bullets.createMultiple({
@@ -56,7 +96,7 @@ export class Character extends Phaser.GameObjects.Sprite {
     })
     this.bullets.setDepth(99)
 
-    console.log(this.bullets)
+    // console.log(this.bullets)
 
     this.hurtBox = this.currentScene.add
       .rectangle(this.x, this.y, attributes.width * 0.7, attributes.height, 0x6666ff)
@@ -124,12 +164,14 @@ export class Character extends Phaser.GameObjects.Sprite {
     }
   }
 
-  protected hit(amount: number): void {
+  protected hit(amount: number, x: number, y: number): void {
     this.health -= amount
     if (this.health <= 0) {
       this.isDying = true
     } else {
       this.damaged()
+      // TODO: ADD KNOCKBACK
+      this.knockback(x, y, amount)
     }
   }
 
@@ -145,19 +187,38 @@ export class Character extends Phaser.GameObjects.Sprite {
     this.currentScene.time.delayedCall(1000, () => this.destroy())
   }
 
-  protected damaged(duration: number = 100, repeat: number = 4): void {
+  protected damaged(): void {
     this.isInvincible = true
     this.currentScene.tweens.add({
       targets: this,
       alpha: { from: 1, to: 0.5 },
       ease: 'Linear', // 'Cubic', 'Elastic', 'Bounce', 'Back'
-      duration: duration,
-      repeat: repeat, // -1: infinity
+      duration: this.damagedRate,
+      repeat: 4, // -1: infinity
       yoyo: true,
       onYoyo: () => this.clearTint(),
       onStart: () => this.setTintFill(0xffffff),
       onRepeat: () => this.setTintFill(0xffffff),
-      onComplete: () => (this.isInvincible = false),
+      onComplete: () => {
+        this.isInvincible = false
+      },
+    })
+  }
+
+  protected knockback(hitX: number, hitY: number, power: number = 1) {
+    const dx = this.x - hitX
+    const dy = this.y - hitY
+    const direction = new Phaser.Math.Vector2(dx, dy).normalize().scale(power * 100)
+
+    this.isDamaged = true
+    this.currentScene.tweens.add({
+      targets: this,
+      alpha: { from: 1, to: 0.5 },
+      ease: 'Linear', // 'Cubic', 'Elastic', 'Bounce', 'Back'
+      duration: 50,
+      repeat: 1, // -1: infinity
+      onStart: () => this.body.setVelocity(direction.x, direction.y),
+      onComplete: () => (this.isDamaged = false),
     })
   }
 }

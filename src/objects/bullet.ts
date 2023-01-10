@@ -34,15 +34,13 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
     super.preUpdate(time, delta)
     this.born += delta
 
-    if (
-      this.born > 1500 ||
-      !Phaser.Geom.Rectangle.Overlaps(this.scene.physics.world.bounds, this.getBounds())
-    ) {
+    if (this.born > 1000) {
+      if (this.visible) this.explode()
       this.kill()
     }
   }
 
-  kill() {
+  explode() {
     let explosion = this.scene.add.sprite(this.x, this.y, 'explosion')
     explosion.anims.play('explode', true)
     explosion.on(
@@ -52,10 +50,13 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
       },
       this
     )
-    this.setActive(false)
     this.setVisible(false)
     this.body.velocity.y = 0
     this.body.velocity.x = 0
     this.setPosition(0, 0)
+  }
+
+  kill() {
+    this.setActive(false)
   }
 }

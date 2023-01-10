@@ -145,9 +145,9 @@
 </data>
  </layer>
  <objectgroup id="3" name="collisions">
-  <object id="41" name="wall" gid="7" x="21" y="22" width="598" height="1"/>
-  <object id="42" name="wall" gid="7" x="618" y="616.945" width="1" height="594.945"/>
-  <object id="43" name="wall" gid="7" x="21" y="618" width="598" height="1"/>
-  <object id="44" name="wall" gid="7" x="21" y="617.209" width="1" height="595.209"/>
+  <object id="41" name="wall" gid="7" x="0" y="22" width="640" height="22"/>
+  <object id="42" name="wall" gid="7" x="618" y="616.945" width="22" height="594.945"/>
+  <object id="43" name="wall" gid="7" x="0" y="640" width="640" height="22"/>
+  <object id="44" name="wall" gid="7" x="0" y="617.998" width="22" height="595.998"/>
  </objectgroup>
 </map>

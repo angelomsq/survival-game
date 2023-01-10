@@ -133,7 +133,7 @@ export default class LoadScene extends Phaser.Scene {
 
     this.anims.create({
       key: 'explode',
-      frameRate: 6,
+      frameRate: 10,
       repeat: 0,
       yoyo: false,
       frames: this.anims.generateFrameNames('explosion', {
@@ -174,24 +174,12 @@ export default class LoadScene extends Phaser.Scene {
     })
 
     this.anims.create({
-      key: 'glow',
+      key: 'coin',
       repeat: -1,
       frameRate: 8,
       frames: this.anims.generateFrameNames('coin', {
         prefix: 'coin_',
         start: 1,
-        end: 11,
-        zeroPad: 2,
-      }),
-    })
-
-    this.anims.create({
-      key: 'spin',
-      repeat: -1,
-      frameRate: 8,
-      frames: this.anims.generateFrameNames('coin', {
-        prefix: 'coin_',
-        start: 8,
         end: 11,
         zeroPad: 2,
       }),

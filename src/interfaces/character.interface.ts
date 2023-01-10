@@ -8,6 +8,7 @@ export interface ICharacter extends ISprite {
   maxHealth: number
   maxBullets: number
   fireRate: number
+  damagedRate: number
   direction: string
   bullets: Phaser.GameObjects.Group
 }
